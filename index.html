@@ -11,136 +11,142 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: an engineering essay on warm paper. One 40rem reading column; on wide screens a margin timeline tracks the incident clock. */
+/* Layout: one 42rem reading column on near-black; a framed hero that replays the incident; an incident clock in the left margin on wide screens. */
 :root{
-  --paper:#08111C;   /* midnight water */
-  --deep:#0C1828;    /* raised surfaces */
-  --ink:#E8EEF5;     /* body text */
-  --ink-2:#8FA3B8;   /* secondary text */
-  --rule:#1D2C3F;    /* hairlines */
-  --glow:#5CC8E8;    /* cable light */
-  --mark:#E8B65A;    /* amber: the fix */
-  --cut:#F0705E;     /* the cut */
-  --well:#0F1D30;    /* code and table fills */
-  --serif:"Newsreader",Georgia,"Times New Roman",serif;
-  --mono:"IBM Plex Mono",Consolas,"Courier New",monospace;
+  --bg:#0B0B0C;      /* page */
+  --panel:#111113;   /* framed surfaces */
+  --ink:#EDEDEE;     /* headings, emphasis */
+  --body:#C4C4C8;    /* running text */
+  --ink-2:#8A8A92;   /* secondary */
+  --rule:#232327;    /* hairlines */
+  --mark:#E8B65A;    /* the one accent: amber, the fix */
+  --cable:#5CC8E8;   /* used only inside the cable visual */
+  --cut:#F0705E;     /* used only for the cut */
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Consolas,monospace;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font:400 1.2rem/1.65 var(--serif);
-  font-optical-sizing:auto;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
-a{color:inherit;text-decoration:underline;text-decoration-color:var(--glow);text-decoration-thickness:1px;text-underline-offset:.18em}
-a:hover{color:var(--glow)}
-:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+body{margin:0;background:var(--bg);color:var(--body);font:400 1.0625rem/1.75 var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:var(--ink);text-decoration:underline;text-decoration-color:#4a4a50;text-decoration-thickness:1px;text-underline-offset:.22em;transition:text-decoration-color .2s}
+a:hover{text-decoration-color:var(--mark)}
+:focus-visible{outline:2px solid var(--mark);outline-offset:2px;border-radius:2px}
+::selection{background:rgba(232,182,90,.3);color:var(--ink)}
 
-.page{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,40rem) minmax(0,1fr);column-gap:3rem;
+.page{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,42rem) minmax(0,1fr);column-gap:3.5rem;
   padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
-.page > *{grid-column:2}
+.page > *{grid-column:2;min-width:0}
 @media (max-width:1179px){.page{grid-template-columns:0 minmax(0,1fr) 0;column-gap:0}}
 
-/* masthead */
-.mast{position:relative;z-index:1;padding-block:3.5rem 0;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
-  font:500 .72rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);
-  border-bottom:1px solid var(--rule);padding-bottom:.9rem}
-.mast a{text-decoration:none}
-header.top{position:relative;z-index:1;padding-block:7rem 5rem}
-.sea{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none;transition:opacity .5s}
-.page{position:relative;z-index:1}
-.legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:2.2rem;font:400 .72rem/1 var(--mono);color:var(--ink-2);letter-spacing:.04em}
-.legend i{display:inline-block;width:18px;height:2px;vertical-align:middle;margin-right:.45rem;border-radius:2px}
-h1{font:500 clamp(2.5rem,6.2vw,4.4rem)/1.02 var(--serif);letter-spacing:-.022em;margin:0 0 1.2rem;text-wrap:balance}
-h1 .t{display:block;color:var(--glow);font-style:italic;font-weight:400;font-variant-numeric:lining-nums}
-.dek{font-size:1.32rem;line-height:1.5;color:var(--ink-2);margin:0 0 1.8rem;font-style:italic;max-width:36rem}
-.byline{display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;font:400 .82rem/1.4 var(--mono);color:var(--ink-2)}
-.byline a{color:var(--ink)}
-.lede-fig{grid-column:1 / -1;max-width:62rem;justify-self:center;width:100%;margin:0 0 3rem}
-.lede-fig img{width:100%;display:block;border:1px solid var(--rule);border-radius:8px;box-shadow:0 40px 80px -40px rgba(92,200,232,.25)}
-.lede-fig figcaption{max-width:40rem;margin:.7rem auto 0}
+nav.top{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding-block:1.6rem;font:500 .8rem/1 var(--sans);color:var(--ink-2)}
+nav.top b{color:var(--ink);font-weight:600;letter-spacing:-.01em}
+nav.top .pill{border:1px solid var(--rule);border-radius:999px;padding:.4rem .75rem;font:500 .72rem/1 var(--mono);color:var(--ink-2)}
+
+header.hero{padding-block:4.5rem 2.5rem}
+.eyebrow{font:500 .78rem/1 var(--mono);color:var(--mark);letter-spacing:.02em;margin:0 0 1.4rem}
+h1{font:600 clamp(2.4rem,5.6vw,3.9rem)/1.04 var(--sans);letter-spacing:-.045em;color:var(--ink);margin:0 0 1.4rem;text-wrap:balance}
+h1 span{color:var(--mark)}
+.dek{font-size:1.2rem;line-height:1.6;color:var(--ink-2);margin:0 0 2rem;max-width:34rem;letter-spacing:-.01em}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1.6rem;font:400 .85rem/1.4 var(--sans);color:var(--ink-2)}
+.meta a{font-weight:500}
+
+/* hero visual: the incident on a loop */
+.stage{grid-column:1 / -1;justify-self:center;width:100%;max-width:64rem;margin:0 0 4.5rem;position:relative;
+  border:1px solid var(--rule);border-radius:14px;background:radial-gradient(120% 90% at 50% 0%,#14161B 0%,var(--panel) 60%);overflow:hidden}
+.stage canvas{display:block;width:100%;height:clamp(240px,38vw,420px)}
+.stage .hud{position:absolute;left:1.1rem;top:1rem;display:flex;flex-direction:column;gap:.2rem;font-family:var(--mono)}
+.stage .hud b{font:500 1.6rem/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.02em;transition:color .3s}
+.stage .hud span{font-size:.75rem;color:var(--ink-2)}
+.stage[data-p="cut"] .hud b{color:var(--cut)}
+.stage[data-p="fixed"] .hud b{color:var(--mark)}
+.stage .key{position:absolute;right:1.1rem;bottom:.9rem;display:flex;gap:1rem;flex-wrap:wrap;font:400 .7rem/1 var(--mono);color:var(--ink-2)}
+.stage .key i{display:inline-block;width:14px;height:2px;border-radius:2px;vertical-align:middle;margin-right:.4rem}
+@media (max-width:560px){.stage{border-radius:10px}.stage .key{display:none}}
 
 /* article */
-main{padding-bottom:4rem;min-width:0}
-main > section{margin:0 0 3rem;min-width:0}
-main > section:first-child > p:first-of-type::first-letter{float:left;font:600 4.3rem/.8 var(--serif);margin:.32rem .55rem 0 0;color:var(--ink)}
-.stamp{font:500 .8rem/1 var(--mono);letter-spacing:.08em;color:var(--mark);margin:0 0 .55rem;font-variant-numeric:tabular-nums}
-section#t0 .stamp{color:var(--cut)}
-main strong{color:#fff;font-weight:600}
-h2{font:600 1.85rem/1.2 var(--serif);letter-spacing:-.014em;margin:0 0 1rem;text-wrap:balance}
-h3{font:600 1.3rem/1.3 var(--serif);margin:2.2rem 0 .7rem}
-p{margin:0 0 1.2rem;hanging-punctuation:first}
-blockquote{margin:1.8rem 0;padding:1rem 1.3rem;background:var(--deep);border-left:2px solid var(--mark);border-radius:0 6px 6px 0;font-style:italic;color:var(--ink)}
+main{padding-bottom:3rem}
+main > section{margin:0 0 3.6rem}
+.stamp{display:inline-block;font:500 .75rem/1 var(--mono);color:var(--mark);border:1px solid rgba(232,182,90,.35);border-radius:999px;padding:.35rem .6rem;margin:0 0 .9rem;font-variant-numeric:tabular-nums}
+section#t0 .stamp{color:var(--cut);border-color:rgba(240,112,94,.35)}
+h2{font:600 1.75rem/1.2 var(--sans);letter-spacing:-.035em;color:var(--ink);margin:0 0 1rem;text-wrap:balance}
+h3{font:600 1.2rem/1.35 var(--sans);letter-spacing:-.02em;color:var(--ink);margin:2.2rem 0 .6rem}
+p{margin:0 0 1.25rem}
+strong{color:var(--ink);font-weight:600}
+em{color:var(--ink);font-style:italic}
+blockquote{margin:1.8rem 0;padding:.2rem 0 .2rem 1.2rem;border-left:2px solid var(--mark);color:var(--ink)}
 blockquote p{margin:0}
-ol,ul{padding-left:1.25rem;margin:0 0 1.3rem}
-li{margin:.4rem 0;padding-left:.2rem}
-li::marker{color:var(--ink-2);font-family:var(--mono);font-size:.85em}
-code{font:400 .8em/1.4 var(--mono);background:var(--well);padding:.08em .32em;border-radius:3px}
-pre{background:var(--well);border:1px solid var(--rule);color:#CFE3F2;padding:1.1rem 1.25rem;overflow-x:auto;margin:1.5rem 0 1.8rem;
-  font-size:.92rem;line-height:1.65;border-radius:3px}
-pre code{background:none;padding:0;font-size:.82em}
-.tablewrap{overflow-x:auto;margin:1.5rem 0 1.8rem}
-table{border-collapse:collapse;width:100%;font:400 .82rem/1.5 var(--mono);font-variant-numeric:tabular-nums}
-th,td{text-align:left;padding:.6rem .9rem .6rem 0;border-bottom:1px solid var(--rule);vertical-align:top}
-thead th{font-weight:500;color:var(--ink-2);border-bottom:1px solid var(--ink-2)}
-td strong{color:var(--glow)}
+ol,ul{padding-left:1.2rem;margin:0 0 1.3rem}
+li{margin:.45rem 0;padding-left:.25rem}
+li::marker{color:var(--ink-2)}
+code{font:400 .86em/1.4 var(--mono);color:var(--ink);background:#18181B;border:1px solid var(--rule);padding:.05em .35em;border-radius:5px}
+pre{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:1.2rem 1.3rem;overflow-x:auto;margin:1.6rem 0 2rem;line-height:1.7}
+pre code{background:none;border:0;padding:0;font-size:.82rem;color:#D9D9DE}
+.tablewrap{overflow-x:auto;margin:1.6rem 0 2rem;border:1px solid var(--rule);border-radius:12px}
+table{border-collapse:collapse;width:100%;font:400 .86rem/1.5 var(--sans);font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:.75rem 1rem;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{font:500 .74rem/1.3 var(--mono);color:var(--ink-2);background:var(--panel)}
+tr:last-child td{border-bottom:0}
+td strong{color:var(--mark)}
 figure{margin:2rem 0 2.4rem}
-figure img{width:100%;display:block;border:1px solid var(--rule);border-radius:6px;box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
-figcaption{font:400 .78rem/1.5 var(--mono);color:var(--ink-2);margin-top:.6rem}
-hr{border:0;border-top:1px solid var(--rule);margin:3rem 0}
+figure img{width:100%;display:block;border:1px solid var(--rule);border-radius:12px}
+figcaption{font:400 .8rem/1.5 var(--sans);color:var(--ink-2);margin-top:.7rem}
 
-/* margin timeline (wide screens only) */
+/* incident clock, left margin */
 .clock{display:none}
 @media (min-width:1180px){
-  .clock{display:block;grid-column:1;grid-row:3 / span 2;justify-self:end;align-self:start;position:sticky;top:3rem;
-    width:12rem;margin-top:.4rem;font:400 .74rem/1.3 var(--mono);color:var(--ink-2)}
-  .clock .now{font:500 2rem/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums;margin:0 0 .3rem;letter-spacing:-.02em}
-  .clock .what{margin:0 0 1.4rem;min-height:1.3em}
+  .clock{display:block;grid-column:1;grid-row:4 / span 2;justify-self:end;align-self:start;position:sticky;top:2.5rem;width:12.5rem;margin-top:.3rem}
+  .clock .now{font:500 1.75rem/1 var(--mono);color:var(--ink);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .clock .what{font:400 .78rem/1.3 var(--sans);color:var(--ink-2);margin:.45rem 0 1.4rem;min-height:1.2em}
   .clock ol{list-style:none;padding:0;margin:0;border-left:1px solid var(--rule)}
-  .clock li{margin:0;padding:.35rem 0 .35rem .9rem;position:relative}
-  .clock li a{text-decoration:none;display:block}
-  .clock li span{display:block;color:var(--ink-2);font-size:.92em}
-  .clock li.on{color:var(--ink)}
-  .clock li.on::before{content:"";position:absolute;left:-1px;top:.35rem;bottom:.35rem;width:2px;background:var(--mark)}
-  .clock li.done{color:var(--ink)}
+  .clock li{margin:0;padding:.4rem 0 .4rem .9rem;position:relative}
+  .clock li a{text-decoration:none;display:block;font:400 .78rem/1.35 var(--sans);color:var(--ink-2);transition:color .2s}
+  .clock li a small{display:block;font:400 .7rem/1.3 var(--mono)}
+  .clock li.done a,.clock li.on a{color:var(--ink)}
+  .clock li.on::before{content:"";position:absolute;left:-1px;top:.4rem;bottom:.4rem;width:2px;border-radius:2px;background:var(--mark)}
   body[data-state="cut"] .clock .now{color:var(--cut)}
   body[data-state="fixed"] .clock .now{color:var(--mark)}
 }
 .mclock{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;justify-content:space-between;align-items:center;
-  padding:.55rem max(20px,env(safe-area-inset-right,0px)) calc(.55rem + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));
-  background:rgba(8,17,28,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--rule);
-  font:500 .8rem/1 var(--mono);color:var(--ink-2)}
-.mclock b{font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+  padding:.6rem max(20px,env(safe-area-inset-right,0px)) calc(.6rem + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));
+  background:rgba(11,11,12,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--rule);
+  font:400 .78rem/1 var(--sans);color:var(--ink-2)}
+.mclock b{font:500 .85rem/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
 body[data-state="cut"] .mclock b{color:var(--cut)} body[data-state="fixed"] .mclock b{color:var(--mark)}
 @media (min-width:1180px){.mclock{display:none}}
-footer{border-top:1px solid var(--rule);padding-block:1.6rem 4rem;font:400 .76rem/1.6 var(--mono);color:var(--ink-2)}
-@media (max-width:560px){body{font-size:1.1rem}h2{font-size:1.55rem}.mast{padding-top:2rem}}
+footer{border-top:1px solid var(--rule);padding-block:1.8rem 5rem;font:400 .8rem/1.65 var(--sans);color:var(--ink-2)}
+@media (max-width:560px){body{font-size:1rem}header.hero{padding-top:2.5rem}h2{font-size:1.5rem}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
 <body data-state="calm">
-<canvas class="sea" id="sea" aria-hidden="true"></canvas>
 <div class="page">
-  <div class="mast"><a href="https://github.com/soujasK/DarkGlass" target="_blank" rel="noopener">DarkGlass</a><span>FalkorDB Graph Hacks · Track 01</span></div>
+  <nav class="top"><b>DarkGlass</b><span class="pill">FalkorDB Graph Hacks · Track 01</span></nav>
 
-  <header class="top">
-    <h1><span class="t">419 milliseconds:</span> how a graph saved 65,536 GPUs from a ship's anchor</h1>
+  <header class="hero">
+    <p class="eyebrow">Incident report · Dunant cable</p>
+    <h1><span>419 milliseconds.</span> How a graph saved 65,536 GPUs from a ship's anchor.</h1>
     <p class="dek">The story of one undersea cable cut, told in the time it takes FalkorDB to fix it.</p>
-    <div class="byline">
+    <div class="meta">
       <span>Soujas K · October 2026</span>
-      <a href="https://youtu.be/-fh9tKQJ4Z8" target="_blank" rel="noopener">Watch the demo (3 min)</a>
-      <a href="https://github.com/soujasK/DarkGlass" target="_blank" rel="noopener">Source on GitHub</a>
+      <a href="https://youtu.be/-fh9tKQJ4Z8" target="_blank" rel="noopener">Watch the demo ↗</a>
+      <a href="https://github.com/soujasK/DarkGlass" target="_blank" rel="noopener">Source on GitHub ↗</a>
     </div>
-    <div class="legend"><span><i style="background:var(--glow)"></i>Dunant, live</span><span><i style="background:var(--cut)"></i>cut</span><span><i style="background:var(--mark)"></i>detour the agent chose</span></div>
   </header>
+
+  <div class="stage" id="stage" data-p="calm">
+    <canvas id="sea" aria-label="Animation: the Dunant cable from Ashburn to Dublin is cut, then traffic reroutes onto a detour"></canvas>
+    <div class="hud"><b id="hudclock">T+0 ms</b><span id="hudphase">Dunant live, Ashburn to Dublin</span></div>
+    <div class="key"><span><i style="background:var(--cable)"></i>Dunant</span><span><i style="background:var(--cut)"></i>cut</span><span><i style="background:var(--mark)"></i>detour</span></div>
+  </div>
 
   <aside class="clock" aria-label="Incident clock">
     <div class="now" id="clock">T+0 ms</div>
     <div class="what" id="phase">before the cut</div>
     <ol id="steps"></ol>
   </aside>
-
-  <figure class="lede-fig"><img src="img/01-start.jpg" alt="DarkGlass: a 65,536-GPU training job across Ashburn and Dublin, on the real undersea cable map"><figcaption>DarkGlass at rest: one training job, 65,536 GPUs across Ashburn and Dublin, on the real TeleGeography cable map.</figcaption></figure>
 
   <main>
 <section class="chapter"><p><em>The story of one undersea cable cut, told in the time it takes FalkorDB to fix it. Built in four days for the WeMakeDevs x FalkorDB Graph Hacks.</em></p>
@@ -323,74 +329,61 @@ powershell -ExecutionPolicy Bypass -File .\start.ps1     # Windows
 <div class="mclock" aria-hidden="true"><span>FalkorDB time</span><b id="mclock">T+0 ms</b></div>
 
 <script>
+/* margin clock: follows the reader through the five timestamps */
 (function(){
   var beats=[].slice.call(document.querySelectorAll('section[data-ms]'));
-  var list=document.getElementById('steps'), clock=document.getElementById('clock'), phase=document.getElementById('phase');
-  if(!list) return;
-  var items=beats.map(function(b){
-    var li=document.createElement('li'), a=document.createElement('a'), h=b.querySelector('h2');
-    a.href='#'+b.id; a.innerHTML='T+'+b.dataset.ms+' ms<span>'+(h?h.textContent:'')+'</span>';
-    li.appendChild(a); list.appendChild(li); return li;
-  });
+  var list=document.getElementById('steps'),clock=document.getElementById('clock'),phase=document.getElementById('phase'),mc=document.getElementById('mclock');
+  var items=beats.map(function(b){var li=document.createElement('li'),a=document.createElement('a'),h=b.querySelector('h2');
+    a.href='#'+b.id;a.innerHTML='<small>T+'+b.dataset.ms+' ms</small>'+(h?h.textContent:'');li.appendChild(a);list.appendChild(li);return li;});
   var words={0:'cable cut',125:'impact traced',254:'detour found',402:'route checked',419:'traffic moved'};
   var shown=0,target=0,raf=null,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var mc=document.getElementById('mclock');function paint(v){clock.textContent='T+'+v+' ms';if(mc)mc.textContent='T+'+v+' ms';}
+  function paint(v){var s='T+'+v+' ms';clock.textContent=s;mc.textContent=s;}
   function step(){shown+=(target-shown)*.2;if(Math.abs(target-shown)<.6)shown=target;paint(Math.round(shown));raf=shown===target?null:requestAnimationFrame(step);}
-  function update(){
-    var mid=innerHeight*.4,cur=-1;
-    beats.forEach(function(b,i){if(b.getBoundingClientRect().top<mid)cur=i;});
+  function update(){var mid=innerHeight*.4,cur=-1;beats.forEach(function(b,i){if(b.getBoundingClientRect().top<mid)cur=i;});
     items.forEach(function(li,i){li.classList.toggle('on',i===cur);li.classList.toggle('done',i<cur);});
     if(cur<0){target=0;phase.textContent='before the cut';document.body.dataset.state='calm';}
     else{target=parseInt(beats[cur].dataset.ms,10);phase.textContent=words[target]||'';document.body.dataset.state=target>=419?'fixed':'cut';}
-    if(reduce){shown=target;paint(target);}else if(!raf){raf=requestAnimationFrame(step);}
-  }
+    if(reduce){shown=target;paint(target);}else if(!raf){raf=requestAnimationFrame(step);}}
   addEventListener('scroll',update,{passive:true});addEventListener('resize',update);update();
 })();
-</script>
-<script>
+
+/* hero: replays the incident on a loop, live -> cut -> rerouted */
 (function(){
-  var cv=document.getElementById('sea'); if(!cv||!cv.getContext) return;
-  var ctx=cv.getContext('2d'), W=0, H=0, dpr=1, t0=performance.now();
-  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var seed=7; function rnd(){ seed=(seed*16807)%2147483647; return seed/2147483647; }
-  var cables=[]; for(var i=0;i<46;i++){ cables.push({y0:rnd(), y1:rnd(), sag:(rnd()-.5)*.5, a:.05+rnd()*.11, w:.6+rnd()*.9, sp:.02+rnd()*.05, off:rnd()}); }
-  var css=getComputedStyle(document.documentElement);
-  var C={glow:css.getPropertyValue('--glow').trim()||'#5CC8E8', cut:css.getPropertyValue('--cut').trim()||'#F0705E', mark:css.getPropertyValue('--mark').trim()||'#E8B65A', ink:'#8FA3B8'};
-  function size(){ dpr=Math.min(2,window.devicePixelRatio||1); W=cv.clientWidth; H=cv.clientHeight; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
-  function bez(p0,p1,p2,p3,t){ var u=1-t; return [u*u*u*p0[0]+3*u*u*t*p1[0]+3*u*t*t*p2[0]+t*t*t*p3[0], u*u*u*p0[1]+3*u*u*t*p1[1]+3*u*t*t*p2[1]+t*t*t*p3[1]]; }
-  function curve(p0,p1,p2,p3,from,to){ ctx.beginPath(); for(var k=0;k<=60;k++){ var q=bez(p0,p1,p2,p3,from+(to-from)*k/60); k?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]); } }
-  function dot(x,y,r,c,glow){ ctx.save(); ctx.shadowColor=c; ctx.shadowBlur=glow; ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); ctx.restore(); }
+  var stage=document.getElementById('stage'),cv=document.getElementById('sea'); if(!cv.getContext) return;
+  var ctx=cv.getContext('2d'),W=0,H=0,hc=document.getElementById('hudclock'),hp=document.getElementById('hudphase');
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,t0=performance.now();
+  var seed=11;function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647;}
+  var others=[];for(var i=0;i<30;i++)others.push({y0:rnd(),y1:rnd(),s:(rnd()-.5)*.6,a:.05+rnd()*.08,sp:.015+rnd()*.03,o:rnd()});
+  var CAB='#5CC8E8',CUT='#F0705E',MARK='#E8B65A';
+  function size(){var d=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);}
+  function bz(a,b,c,e,t){var u=1-t;return[u*u*u*a[0]+3*u*u*t*b[0]+3*u*t*t*c[0]+t*t*t*e[0],u*u*u*a[1]+3*u*u*t*b[1]+3*u*t*t*c[1]+t*t*t*e[1]];}
+  function path(a,b,c,e,f,g){ctx.beginPath();for(var k=0;k<=64;k++){var q=bz(a,b,c,e,f+(g-f)*k/64);k?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]);}}
+  function dot(x,y,r,c,bl){ctx.save();ctx.shadowColor=c;ctx.shadowBlur=bl;ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.restore();}
+  /* the loop: 3 s live, then the 419 ms of graph work slowed to 4 s, then 4 s rerouted */
+  var LIVE=3,WORK=4,DONE=4,LOOP=LIVE+WORK+DONE;
+  var marks=[[0,'cable cut'],[125,'who is hurt: 32,768 GPUs'],[254,'detour: Havfrue/AEC-2'],[402,'route checked'],[419,'traffic moved']];
   function frame(now){
-    var t=(now-t0)/1000, st=document.body.dataset.state||'calm';
+    var t=(now-t0)/1000,lt=reduce?LIVE+WORK+1:t%LOOP,p,ms=0;
+    if(lt<LIVE)p='calm';else if(lt<LIVE+WORK){p='cut';ms=Math.round(419*(lt-LIVE)/WORK);}else{p='fixed';ms=419;}
+    stage.dataset.p=p;hc.textContent='T+'+ms+' ms';
+    if(p==='calm')hp.textContent='Dunant live, Ashburn to Dublin';else{var l=marks[0][1];marks.forEach(function(m){if(ms>=m[0])l=m[1];});hp.textContent=l;}
     ctx.clearRect(0,0,W,H);
-    // the ocean's other cables: faint, each with a slow drifting glint
-    cables.forEach(function(c){
-      var p0=[-40,H*(.12+c.y0*.8)], p3=[W+40,H*(.12+c.y1*.8)], p1=[W*.33,p0[1]+H*c.sag], p2=[W*.66,p3[1]-H*c.sag];
-      ctx.strokeStyle='rgba(143,190,230,'+c.a+')'; ctx.lineWidth=c.w; curve(p0,p1,p2,p3,0,1); ctx.stroke();
-      var g=(c.off+t*c.sp)%1, q=bez(p0,p1,p2,p3,g); dot(q[0],q[1],1.1,'rgba(160,215,245,.55)',6);
-    });
-    // Dunant: Ashburn (IAD) to Dublin (DUB)
-    var A=[W*.1,H*.66], B=[W*.9,H*.36], d1=[W*.38,H*.78], d2=[W*.62,H*.46];
-    var cut=(st!=='calm');
+    others.forEach(function(c){var a=[-30,H*(.1+c.y0*.85)],e=[W+30,H*(.1+c.y1*.85)],b=[W*.33,a[1]+H*c.s],d=[W*.66,e[1]-H*c.s];
+      ctx.strokeStyle='rgba(180,200,225,'+c.a+')';ctx.lineWidth=1;path(a,b,d,e,0,1);ctx.stroke();
+      var q=bz(a,b,d,e,(c.o+t*c.sp)%1);dot(q[0],q[1],1,'rgba(200,220,240,.5)',4);});
+    var A=[W*.12,H*.7],B=[W*.88,H*.38],c1=[W*.4,H*.86],c2=[W*.6,H*.5];
     ctx.lineWidth=2;
-    if(!cut){ ctx.strokeStyle=C.glow; ctx.globalAlpha=.85; curve(A,d1,d2,B,0,1); ctx.stroke(); ctx.globalAlpha=1;
-      for(var j=0;j<3;j++){ var q=bez(A,d1,d2,B,((t*.18)+j/3)%1); dot(q[0],q[1],2.6,C.glow,18); } }
-    else { ctx.strokeStyle=C.cut; ctx.globalAlpha=.9; curve(A,d1,d2,B,0,.46); ctx.stroke(); curve(A,d1,d2,B,.52,1); ctx.stroke(); ctx.globalAlpha=1;
-      var m=bez(A,d1,d2,B,.49), pulse=4+Math.sin(t*4)*1.5; dot(m[0],m[1],pulse,C.cut,24); }
-    // the detour the agent chose
-    if(st==='fixed'){ var e1=[W*.34,H*.18], e2=[W*.66,H*.12];
-      ctx.strokeStyle=C.mark; ctx.lineWidth=2.2; curve(A,e1,e2,B,0,1); ctx.stroke();
-      for(var k=0;k<4;k++){ var r=bez(A,e1,e2,B,((t*.22)+k/4)%1); dot(r[0],r[1],2.8,C.mark,20); } }
-    // stations
-    [[A,'IAD'],[B,'DUB']].forEach(function(s){ dot(s[0][0],s[0][1],3.5,'#E8EEF5',12);
-      ctx.fillStyle='#8FA3B8'; ctx.font='500 11px "IBM Plex Mono",monospace'; ctx.fillText(s[1],s[0][0]+9,s[0][1]-9); });
-    if(!reduce) requestAnimationFrame(frame);
+    if(p==='calm'){ctx.strokeStyle=CAB;path(A,c1,c2,B,0,1);ctx.stroke();for(var j=0;j<3;j++){var q=bz(A,c1,c2,B,(t*.2+j/3)%1);dot(q[0],q[1],2.5,CAB,16);}}
+    else{ctx.strokeStyle='rgba(240,112,94,.75)';path(A,c1,c2,B,0,.46);ctx.stroke();path(A,c1,c2,B,.53,1);ctx.stroke();
+      var m=bz(A,c1,c2,B,.495);dot(m[0],m[1],3.5+Math.sin(t*5)*1.2,CUT,22);}
+    if(p!=='calm'&&ms>=254){var e1=[W*.36,H*.12],e2=[W*.64,H*.06],grow=p==='fixed'?1:Math.min(1,(ms-254)/165);
+      ctx.strokeStyle=MARK;ctx.lineWidth=2.2;path(A,e1,e2,B,0,grow);ctx.stroke();
+      if(p==='fixed')for(var k=0;k<4;k++){var r=bz(A,e1,e2,B,(t*.24+k/4)%1);dot(r[0],r[1],2.6,MARK,18);}}
+    [[A,'IAD  Ashburn'],[B,'DUB  Dublin']].forEach(function(s){dot(s[0][0],s[0][1],3.5,'#EDEDEE',10);
+      ctx.fillStyle='#8A8A92';ctx.font='500 11px "Geist Mono",monospace';ctx.fillText(s[1],s[0][0]+10,s[0][1]+18);});
+    if(!reduce)requestAnimationFrame(frame);
   }
-  function dim(){ var y=scrollY/innerHeight; cv.style.opacity=String(Math.max(.2,1-y*1.1)); }
-  addEventListener('scroll',dim,{passive:true}); dim();
-  size(); addEventListener('resize',function(){ size(); if(reduce) frame(performance.now()); });
-  if(reduce){ frame(performance.now()); addEventListener('scroll',function(){ frame(performance.now()); },{passive:true}); }
-  else requestAnimationFrame(frame);
+  size();addEventListener('resize',function(){size();if(reduce)frame(performance.now());});requestAnimationFrame(frame);
 })();
 </script>
 </body>
