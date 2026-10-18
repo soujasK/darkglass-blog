@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>419 milliseconds · DarkGlass</title>
+<meta name="description" content="How a FalkorDB graph agent saved 65,536 GPUs from a ship's anchor, told in the 419 milliseconds it takes to fix.">
+<meta property="og:title" content="419 milliseconds: how a graph saved 65,536 GPUs from a ship's anchor">
+<meta property="og:description" content="An 11-hop Cypher traversal, graph algorithms as MCP tools, and an agent that explains every step. Built on FalkorDB.">
+<meta property="og:image" content="img/finalimage.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a ship's logbook on beige chart paper. One reading column; a stopwatch that runs in FalkorDB time as you scroll. */
+:root{
+  --paper:#ECE2CF; --sheet:#F5EEE1; --ink:#1E1B16; --ink-2:#5A4F40; --rule:#CDBC9E;
+  --amber:#A8650F; --cut:#B03A2C; --sea:#21445E; --code:#E4D8C1;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --body:"Literata",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",Consolas,"Courier New",monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root{
+  --paper:#17140F; --sheet:#201C16; --ink:#EDE3D0; --ink-2:#B5A68D; --rule:#3E3629;
+  --amber:#E0B156; --cut:#E5604F; --sea:#8FB3D1; --code:#2A241C; color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.125rem/1.7 var(--body);
+  -webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);
+  background-size:48px 48px;background-attachment:fixed;background-blend-mode:normal}
+body::after{content:"";position:fixed;inset:0;background:var(--paper);opacity:.86;pointer-events:none;z-index:-1}
+a{color:var(--sea);text-underline-offset:3px;text-decoration-thickness:1px}
+a:hover{color:var(--amber)}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+
+/* the cable: top progress line, dark at the cut, amber once fixed */
+.cable{position:fixed;inset:0 0 auto;height:4px;z-index:20;background:var(--rule)}
+.cable i{display:block;height:100%;width:var(--p,0%);background:var(--sea);transition:background .4s}
+body[data-state="cut"] .cable i{background:var(--cut)}
+body[data-state="fixed"] .cable i{background:var(--amber)}
+
+/* stopwatch */
+.watch{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;
+  background:var(--ink);color:var(--paper);border-radius:14px;padding:.7rem 1rem .75rem;min-width:11.5rem;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);font-family:var(--mono)}
+.watch small{display:block;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+.watch b{display:block;font:700 1.9rem/1.1 var(--mono);font-variant-numeric:tabular-nums;color:var(--paper)}
+body[data-state="cut"] .watch b{color:#F08A7C}
+body[data-state="fixed"] .watch b{color:#E8BE6A}
+.watch span{font-size:.72rem;opacity:.8}
+
+/* hero */
+.wrap{max-width:46rem;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.hero{padding-block:4.5rem 2.5rem}
+.kicker{font:600 .78rem/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);display:flex;gap:.6rem;flex-wrap:wrap}
+.kicker em{font-style:normal;color:var(--cut)}
+.big{font:900 clamp(5rem,19vw,10.5rem)/.82 var(--display);font-stretch:62%;letter-spacing:-.02em;margin:1.2rem 0 .2rem;color:var(--ink)}
+.big sub{font-size:.34em;font-stretch:100%;vertical-align:baseline;color:var(--amber);margin-left:.06em}
+h1{font:800 clamp(1.7rem,4.6vw,2.6rem)/1.12 var(--display);font-stretch:85%;margin:.8rem 0 1rem;text-wrap:balance;letter-spacing:-.01em}
+.dek{font-style:italic;color:var(--ink-2);font-size:1.15rem;margin:0 0 1.6rem;max-width:38rem}
+.ctas{display:flex;gap:.75rem;flex-wrap:wrap}
+.btn{font:600 .9rem/1 var(--mono);padding:.85rem 1.1rem;border-radius:999px;text-decoration:none;border:1.5px solid var(--ink);color:var(--ink);background:transparent}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn:hover{background:var(--amber);border-color:var(--amber);color:var(--paper)}
+.coverfig{margin:2.4rem 0 0}
+.coverfig img{width:100%;border-radius:10px;display:block;border:1px solid var(--rule)}
+
+/* facts strip */
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin:2.4rem 0 0}
+.facts div{background:var(--sheet);padding:1rem .9rem}
+.facts b{display:block;font:800 1.55rem/1.05 var(--display);font-stretch:75%;font-variant-numeric:tabular-nums}
+.facts span{display:block;margin-top:.35rem;font:500 .72rem/1.35 var(--mono);color:var(--ink-2);letter-spacing:.04em}
+@media (max-width:620px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* article */
+main{padding-block:1rem 6rem}
+section{margin:0 0 3.4rem;min-width:0}
+section.beat{position:relative;padding-left:1.4rem;border-left:2px solid var(--rule)}
+section.beat.on{border-left-color:var(--amber)}
+.stamp{font:700 1rem/1 var(--mono);color:var(--amber);letter-spacing:.06em;margin-bottom:.4rem;font-variant-numeric:tabular-nums}
+section.beat:first-of-type .stamp{color:var(--cut)}
+h2{font:800 clamp(1.5rem,3.6vw,2.1rem)/1.15 var(--display);font-stretch:80%;margin:0 0 1rem;text-wrap:balance}
+h3{font:700 1.2rem/1.3 var(--display);font-stretch:90%;margin:2rem 0 .6rem}
+p{margin:0 0 1.15rem}
+strong{font-weight:700}
+em{font-style:italic}
+blockquote{margin:1.4rem 0;padding:1rem 1.2rem;background:var(--sheet);border-left:3px solid var(--amber);border-radius:0 8px 8px 0}
+blockquote p{margin:0}
+ol,ul{padding-left:1.3rem;margin:0 0 1.2rem}
+li{margin:.35rem 0}
+code{font:500 .86em/1.4 var(--mono);background:var(--code);padding:.1em .35em;border-radius:4px}
+pre{background:var(--ink);color:#EADFC9;padding:1.1rem 1.2rem;border-radius:10px;overflow-x:auto;margin:1.2rem 0 1.5rem;font-size:.82rem;line-height:1.6}
+pre code{background:none;padding:0;color:inherit;font-size:1em}
+.tablewrap{overflow-x:auto;margin:1.2rem 0 1.5rem;border:1px solid var(--rule);border-radius:10px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;font:500 .86rem/1.45 var(--mono);font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:.65rem .85rem;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;color:var(--ink-2);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase}
+tr:last-child td{border-bottom:0}
+figure{margin:1.6rem 0 2rem}
+figure img{width:100%;display:block;border-radius:10px;border:1px solid var(--rule)}
+figcaption{font:500 .78rem/1.45 var(--mono);color:var(--ink-2);margin-top:.55rem}
+footer{border-top:1px solid var(--rule);padding-block:2rem 7rem;font:500 .8rem/1.6 var(--mono);color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.cable i{transition:none}}
+@media (max-width:520px){.watch{min-width:0;padding:.55rem .8rem}.watch b{font-size:1.4rem}section.beat{padding-left:1rem}}
+</style>
+</head>
+<body data-state="calm">
+<div class="cable" aria-hidden="true"><i></i></div>
+<aside class="watch" aria-live="off" aria-label="FalkorDB time">
+  <small>FalkorDB time</small>
+  <b id="clock">T+0 ms</b>
+  <span id="phase">before the cut</span>
+</aside>
+
+<div class="wrap">
+<header class="hero">
+  <div class="kicker"><span>DarkGlass</span><span>·</span><span>FalkorDB Graph Hacks</span><span>·</span><em>Track 01</em></div>
+  <div class="big" aria-hidden="true">419<sub>ms</sub></div>
+  <h1>419 milliseconds: how a graph saved 65,536 GPUs from a ship's anchor</h1>
+  <p class="dek">The story of one undersea cable cut, told in the time it takes FalkorDB to fix it. Built in four days for the WeMakeDevs x FalkorDB Graph Hacks.</p>
+  <div class="ctas">
+    <a class="btn primary" href="https://youtu.be/-fh9tKQJ4Z8" target="_blank" rel="noopener">▶ Watch the 3-min demo</a>
+    <a class="btn" href="https://github.com/soujasK/DarkGlass" target="_blank" rel="noopener">Code on GitHub</a>
+  </div>
+  <div class="facts">
+    <div><b>65,536</b><span>GPUs restored</span></div>
+    <div><b>11 hops</b><span>seabed to GPU, one Cypher</span></div>
+    <div><b>0.8 ms</b><span>detour search (SQL: 1,770)</span></div>
+    <div><b>603</b><span>real cables, all failed once</span></div>
+  </div>
+  <figure class="coverfig"><img src="img/01-start.jpg" alt="65,536 GPUs training one model across Ashburn and Dublin, on the real undersea cable map"></figure>
+</header>
+
+<main>
+<section class="chapter"><p><em>The story of one undersea cable cut, told in the time it takes FalkorDB to fix it. Built in four days for the WeMakeDevs x FalkorDB Graph Hacks.</em></p>
+
+<p>Somewhere off Virginia Beach, a cargo ship is dragging its anchor.</p>
+<p>Not far inland, 65,536 GPUs are training one AI model. Half sit in Ashburn, Virginia, half in Dublin, Ireland. Every <strong>45 milliseconds</strong> they stop, swap what they've learned, and carry on. The swap rides a fibre pair on a cable called <strong>Dunant</strong>. If one message is late, all 65,536 wait.</p>
+<p>The anchor catches Dunant.</p>
+<p>This post is about what happens next: <strong>419 milliseconds</strong> of graph work that find out who is hurt, where the traffic can go, whether the new route will hold, and then move it. Every timestamp below is a real measurement from the demo video, counted in FalkorDB time: the clock only runs while the graph is working, not while Gemini is thinking about which tool to call next. Every query is the real one.</p>
+<p><em>(Is this realistic? In 2024, three Red Sea cables were cut, reportedly by the dragging anchor of a sinking cargo ship. Anchors have damaged Baltic cables too. The cable map in this project is real, from TeleGeography. The GPU cluster is modelled; more on that below.)</em></p></section>
+<section class="beat" data-ms="0"><div class="stamp">T+0 ms</div><h2>Everything stops</h2>
+<p>Dunant's spans between Virginia Beach and France go dark. In the graph, that's one write: their relationships are retyped from <code>:OPTICAL_SPAN</code> to <code>:SEVERED_SPAN</code>, so every algorithm that follows simply cannot see them.</p>
+<p>The gradient sync stalls. In this scenario, the frozen cluster costs <strong>$18,420 an hour</strong>: about five dollars a second, ticking.</p>
+<figure><img src="img/02-cable-cut.jpg" alt="The cut: GPUs frozen, the cost counting, and the graph already remembering how often this cable has failed" loading="lazy"><figcaption>The cut: GPUs frozen, the cost counting, and the graph already remembering how often this cable has failed</figcaption></figure>
+<p>A human operator now faces four questions, and each one crosses systems that normally don't talk to each other: the seabed, the optical spans, the tunnels, the switch fabric, the GPUs, the jobs.</p>
+<p>DarkGlass keeps all of it in <strong>one FalkorDB graph</strong>: 603 real cables, 1,788 real landing stations, and a modelled AI supercomputer, about <strong>166,000 nodes</strong> in all. An agent gets four tools over <strong>MCP</strong>, each one a FalkorDB query or algorithm, and Gemini decides which to call next.</p>
+<p>The clock starts.</p></section>
+<section class="beat" data-ms="125"><div class="stamp">T+125 ms</div><h2>Who is hurt?</h2>
+<p>The first tool walks from the beach to the GPU. One Cypher pattern, <strong>11 hops</strong>, four layers:</p>
+<pre><code>MATCH p = (s:LandingStation)-[:LANDS]-&gt;(c:CableSystem {id: $cable_id})
+          &lt;-[:CARRIED_BY]-(t:LogicalTunnel)
+          -[:TERMINATES_AT]-&gt;(:BorderRouter)-[:FEEDS]-&gt;(:SuperSpine)-[:FEEDS]-&gt;(:Spine)
+          -[:FEEDS]-&gt;(:Leaf)-[:FEEDS]-&gt;(:Server)-[:HAS_NIC]-&gt;(:NIC)-[:ATTACHED_TO]-&gt;(:GPU)
+          -[:MEMBER_OF]-&gt;(ring:NCCL_Ring)&lt;-[:COORDINATES]-(:TrainingJob)
+WHERE (ring)-[:USES_TUNNEL]-&gt;(t)
+RETURN length(p) AS hops, [n IN nodes(p) | coalesce(n.code, n.name, n.id)] AS nodes
+LIMIT 1
+</code></pre>
+<p>Read it aloud and it's nearly English: <em>the station lands the cable, the cable carries a tunnel, the tunnel ends at a border router, which feeds three tiers of switches, down to a server, its network card, its GPU, the GPU's sync ring, and the job.</em></p>
+<p>In SQL, that's 11 joins across 11 tables. In a graph, it's the shape of the problem written down.</p>
+<p>A second sweep finds every GPU behind the cut: <strong>32,768 GPUs, 4,096 servers, 1,024 racks, 8 halls.</strong> Done 125 ms after the cut.</p>
+<figure><img src="img/03-eleven-hops.jpg" alt="The 11-hop path, drawn: from Virginia Beach to a single GPU and its job" loading="lazy"><figcaption>The 11-hop path, drawn: from Virginia Beach to a single GPU and its job</figcaption></figure></section>
+<section class="beat" data-ms="254"><div class="stamp">T+254 ms</div><h2>Where can the traffic go?</h2>
+<p>This is the question that made me choose a graph database, and the one that nearly broke the project.</p>
+<p>"Find the fastest route from Ashburn to Dublin that avoids the damaged trench and has 3.2 Tbps free on every hop" has <strong>no fixed depth</strong>. The answer might be 6 hops or 12. I gave SQL a fair shot, on identical data:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>SQL allowed to search up to</th>
+<th>Time</th>
+<th>What it found</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4 hops</td>
+<td>0.8 ms</td>
+<td>nothing</td>
+</tr>
+<tr>
+<td>6 hops</td>
+<td>4.4 ms</td>
+<td>a <em>worse</em> route (33.5 ms)</td>
+</tr>
+<tr>
+<td>8 hops</td>
+<td>34.6 ms</td>
+<td>✅ the real best route, 30.4 ms</td>
+</tr>
+<tr>
+<td>12 hops</td>
+<td>1,770 ms</td>
+<td>✅ same route, 50× slower</td>
+</tr>
+<tr>
+<td>no limit</td>
+<td>doesn't finish in 10 s</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>SQL has to be told how deep to look, and if you guess too shallow, it confidently hands you the wrong answer. FalkorDB's <code>algo.SPpaths</code> finds the 30.4 ms route in <strong>0.8 ms</strong> of engine time, without being told anything.</p>
+<h3>The trap I fell into</h3>
+<p>But there's a catch that has nothing to do with speed. <strong>Dunant shares a trench with MAREA.</strong> Both cables leave the same Virginia Beach shelf, so in the graph their spans share a <em>shared risk link group</em> (<code>srlg_id</code>). If an anchor got Dunant, MAREA might be next. A detour onto MAREA would look perfect on a latency chart and be the worst possible decision.</p>
+<p>My first version did the obvious thing: ask <code>algo.SPpaths</code> for the k fastest paths, then throw away any path through the bad trench.</p>
+<p>It returned <strong>nothing</strong>. Near a shared shelf, <em>all</em> k fastest paths crossed the trench. A clean detour existed, just further down the list. Filtering after the search deleted every answer. Bounding the search with <code>maxLen</code> or <code>maxCost</code> didn't rescue it either: on this graph they missed valid paths or hit the timeout.</p>
+<p>The fix was to <strong>change the graph instead of the result</strong>. For the length of one search, every span in the damaged trench, and every span without enough free capacity, gets a route weight of 1,000,000. Then:</p>
+<pre><code>MATCH (src:LandingStation {code: $src_code}), (dst:LandingStation {code: $dst_code})
+CALL algo.SPpaths({
+  sourceNode: src, targetNode: dst,
+  relTypes: ['OPTICAL_SPAN'], weightProp: 'route_weight', pathCount: $k
+}) YIELD path, pathWeight
+RETURN [n IN nodes(path) | n.code] AS station_hops, pathWeight AS latency_ms
+ORDER BY latency_ms
+</code></pre>
+<p>Then the weights go back. If the best path still weighs a million, there is genuinely no safe detour, and the agent says so instead of guessing.</p>
+<p>The answer: <strong>Havfrue/AEC-2, 30.4 ms, 8 hops, nowhere near the damaged trench.</strong> 254 ms after the cut.</p></section>
+<section class="beat" data-ms="402"><div class="stamp">T+402 ms</div><h2>Will the new route hold?</h2>
+<p>A route can be fast and still funnel an ocean's worth of traffic through one small relay station. So the third tool runs <code>algo.betweenness</code>, which measures how many shortest paths pass through each station, and grades every station on the new route against the network's own 95th and 99th percentiles. "Busy" means busy <em>for this network</em>, not a magic number.</p>
+<p>I didn't want to trust an algorithm I hadn't checked, so I ran the same calculation in NetworkX across all 1,790 stations. Full mode: <strong>the top 10 match exactly.</strong> The 32-station sample the agent uses for speed: <strong>9 of 10 match, same #1.</strong> One thing I learned on the way: sampled scores aren't scaled back up to the whole graph, so compare rankings, not raw numbers.</p>
+<p>Verdict: the busiest relay on the route, Galway, is within limits. 402 ms.</p></section>
+<section class="beat" data-ms="419"><div class="stamp">T+419 ms</div><h2>Move it</h2>
+<p>The last tool acts. In one atomic write it reserves bandwidth on every hop of the new route (all or nothing), demotes lower-priority backup traffic sharing those cables, and moves the training tunnel's <code>CARRIED_BY</code> relationship from Dunant to Havfrue/AEC-2.</p>
+<p>The GPUs start talking again.</p>
+<figure><img src="img/04-fixed.jpg" alt="Fixed: training restored, with the reasons and the tools Gemini chose, in order" loading="lazy"><figcaption>Fixed: training restored, with the reasons and the tools Gemini chose, in order</figcaption></figure>
+<p><strong>419 milliseconds of graph work.</strong> On screen, the whole fix took 34.9 seconds, because Gemini thinks between each step about which tool to call next. There's also a Playbook mode that runs the same four tools with no AI at all: it reaches the identical fix in <strong>0.4 seconds</strong>.</p>
+<p>That comparison is the most honest thing in the project. <em>The AI decides what to ask. The graph does the work.</em></p></section>
+<section class="chapter"><h2>T+∞: show your work</h2>
+<p>An agent that silently moves traffic on a 65,536-GPU job would never be allowed near production. So DarkGlass explains itself:</p>
+<blockquote>
+<p><em>Why this route: MAREA shares the damaged trench, 1,209 links were too full, 30.4 ms fits the 50.1 ms limit, and the busiest relay (Galway) is within limits.</em></p>
+</blockquote>
+<p>Every tool is listed with its timing. <strong>Every number opens the exact Cypher that produced it.</strong> Gemini writes a plain-English summary. And the incident itself is saved into the graph, <code>(:Incident)-[:SEVERED]-&gt;(:CableSystem)</code> and <code>-[:REROUTED_VIA]-&gt;</code>, so the next time Dunant fails, the agent remembers what worked.</p>
+<p>Because it's all one graph, you can open it in <strong>FalkorDB Browser</strong> and see the chain with your own eyes:</p>
+<figure><img src="img/06-falkordb-browser.jpg" alt="FalkorDB Browser: the training job, its ring, the tunnels, the cables they ride and where those cables land" loading="lazy"><figcaption>FalkorDB Browser: the training job, its ring, the tunnels, the cables they ride and where those cables land</figcaption></figure></section>
+<section class="chapter"><h2>The question after the incident</h2>
+<p>Once Dunant is fixed, the obvious question is the scary one: <strong>what if it had been a different cable?</strong></p>
+<p>So DarkGlass cuts <em>all of them</em>. <code>GRAPH.COPY</code> clones the live graph into 4 sandbox graphs inside the same FalkorDB instance, and every one of the 603 cables is failed once, in parallel, without ever touching the real graph. For each cut:</p>
+<ul>
+<li><code>algo.WCC</code> (connected components) finds which landing stations fall off the network;</li>
+<li><code>algo.maxFlow</code> measures how much North America to Europe capacity is left;</li>
+<li><code>algo.SPpaths</code> measures how much slower the Ashburn to Dublin route gets.</li>
+</ul>
+<p><strong>603 failures, about a minute.</strong> KAFOS strands 9 stations across 5 countries. BRUSA drains 141 Tbps of Atlantic capacity. MAREA, Dunant and the Pan European Crossing each freeze the entire job.</p>
+<p>(<code>algo.maxFlow</code> refused the real cable map, which has parallel spans and huge capacity ranges, so it runs on a derived whole-Gbps <code>:FLOW_LINK</code> layer. Real data always finds the edge cases.)</p>
+<figure><img src="img/07-planet-scan.jpg" alt="Planet scan: every cable on Earth failed once, ranked three ways" loading="lazy"><figcaption>Planet scan: every cable on Earth failed once, ranked three ways</figcaption></figure>
+<p>And when you just want to <em>ask</em>, Gemini turns plain English into Cypher that runs under <code>GRAPH.RO_QUERY</code>, so it can read but never write. On a 23-question eval with hand-written reference answers, it scored <strong>66 out of 69</strong>.</p></section>
+<section class="chapter"><h2>Receipts</h2>
+<p>"Graphs are fast" is cheap. So the Proof tab runs the agent's questions on any cut in <strong>FalkorDB, NetworkX and SQLite, on identical data</strong>, verified by a sha256 of the 260,800-edge snapshot each engine reads back.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>FalkorDB</th>
+<th>NetworkX</th>
+<th>SQLite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Detour search</td>
+<td><strong>0.8 ms</strong></td>
+<td>34 ms</td>
+<td>1,770 ms, and wrong below 8 hops</td>
+</tr>
+<tr>
+<td>Bottleneck audit (32 sources)</td>
+<td><strong>22 ms</strong></td>
+<td>131 ms</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Exact betweenness</td>
+<td><strong>830 ms</strong></td>
+<td>7,510 ms</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>Full honesty: 0.8 ms is the search alone. The whole detour tool, including masking and restoring about 1,200 links, takes about 50 ms, similar to NetworkX end to end on this layer. The real win is that it all happens <em>inside the database the agent already lives in</em>: no export, no second copy of the truth.</p>
+<figure><img src="img/09-proof.jpg" alt="Proof: the same cut, three engines, identical data" loading="lazy"><figcaption>Proof: the same cut, three engines, identical data</figcaption></figure></section>
+<section class="chapter"><h2>Five things 419 milliseconds taught me</h2>
+<ol>
+<li><strong>Don't filter after you search. Shape the graph before you search.</strong> Filtering the results deleted every valid detour; masking the trench before the search fixed it.</li>
+<li><strong>Every AI agent needs a boring twin.</strong> The no-AI Playbook is my correctness oracle, my demo that runs without cloud keys, and my answer to "what does the LLM actually add?"</li>
+<li><strong>Verify the algorithm, not just the speed.</strong> Ten minutes against NetworkX turned "I think centrality is right" into "it matches."</li>
+<li><strong>Timeouts hide everywhere.</strong> My planet scan kept failing, and the cause was a client library's 5-second socket default, not the database. FalkorDB's own query limit defaults to 1 second, so the repo's Docker setup raises it to 15.</li>
+<li><strong>LLMs reach for features you don't have.</strong> Gemini kept writing <code>=~</code> regexes, which FalkorDB doesn't support. One line in the prompt fixed it, and the eval caught every regression after.</li>
+</ol></section>
+<section class="chapter"><h2>Run it yourself</h2>
+<pre><code>git clone <a target="_blank" rel="noopener" href="https://github.com/soujasK/DarkGlass.git">https://github.com/soujasK/DarkGlass.git</a>
+cd DarkGlass
+powershell -ExecutionPolicy Bypass -File .\start.ps1     # Windows
+./start.sh                                                # macOS / Linux
+</code></pre>
+<p>Docker, Python 3.11+ and Node 20+. No API keys. Pick any of the 603 cables, cut it, and watch.</p>
+
+<p>The internet is a graph. An AI supercomputer is a graph. When one breaks, the damage is a path through both, and with the right database an agent can walk that path, choose its own tools, act, and explain itself, all before the next gradient sync is due.</p>
+<p><strong>▶ Watch the 419 milliseconds:</strong> <a target="_blank" rel="noopener" href="https://youtu.be/-fh9tKQJ4Z8">https://youtu.be/-fh9tKQJ4Z8</a>
+<strong>⭐ Code:</strong> <a target="_blank" rel="noopener" href="https://github.com/soujasK/DarkGlass">https://github.com/soujasK/DarkGlass</a></p>
+<p><em>Built for the WeMakeDevs x FalkorDB Graph Hacks, Track 01: Agents That Act on Connected Data. Cable data © TeleGeography (CC BY-NC-SA 3.0). The GPU cluster, capacities and jobs are modelled; "Llama-4 400B MoE pretrain" is an illustrative name with no connection to Meta.</em></p></section>
+</main>
+
+<footer>
+  Built for the WeMakeDevs x FalkorDB Graph Hacks, Track 01: Agents That Act on Connected Data.<br>
+  Cable data © TeleGeography (CC BY-NC-SA 3.0). The GPU cluster, capacities and jobs are modelled;
+  "Llama-4 400B MoE pretrain" is an illustrative name with no connection to Meta.<br>
+  <a href="https://github.com/soujasK/DarkGlass" target="_blank" rel="noopener">github.com/soujasK/DarkGlass</a>
+</footer>
+</div>
+
+<script>
+(function(){
+  var clock=document.getElementById('clock'), phase=document.getElementById('phase'), bar=document.querySelector('.cable i');
+  var beats=[].slice.call(document.querySelectorAll('section.beat'));
+  var shown=0, target=0, raf=null;
+  var reduce=window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function label(ms){
+    if(ms==='inf') return ['T+∞','explaining the fix','fixed'];
+    if(ms>=419) return ['T+419 ms','traffic moved','fixed'];
+    if(ms>0) return ['T+'+ms+' ms','graph working','cut'];
+    return ['T+0 ms','cable cut','cut'];
+  }
+  function tick(){
+    if(typeof target==='string'){ render('inf'); return; }
+    if(reduce){ shown=target; render(shown); return; }
+    shown += (target-shown)*0.18;
+    if(Math.abs(target-shown)<0.6) shown=target;
+    render(Math.round(shown));
+    if(shown!==target) raf=requestAnimationFrame(tick); else raf=null;
+  }
+  function render(ms){ var l=label(ms); clock.textContent=l[0]; phase.textContent=l[1]; document.body.dataset.state=l[2]; }
+  function update(){
+    var mid=window.innerHeight*0.45, cur=null;
+    beats.forEach(function(b){ var r=b.getBoundingClientRect(); if(r.top<mid) cur=b; b.classList.toggle('on', b===cur); });
+    beats.forEach(function(b){ b.classList.toggle('on', b===cur); });
+    if(!cur){ target=0; shown=0; clock.textContent='T+0 ms'; phase.textContent='before the cut'; document.body.dataset.state='calm'; }
+    else { var v=cur.dataset.ms; target=(v==='∞')?'inf':parseInt(v,10); if(!raf) raf=requestAnimationFrame(tick); }
+    var h=document.documentElement, p=h.scrollTop/((h.scrollHeight-h.clientHeight)||1);
+    bar.style.setProperty('--p',(Math.min(1,Math.max(0,p))*100).toFixed(1)+'%');
+  }
+  window.addEventListener('scroll',update,{passive:true});
+  window.addEventListener('resize',update);
+  update();
+})();
+</script>
+</body>
+</html>
